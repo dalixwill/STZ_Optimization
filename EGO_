@@ -1,0 +1,97 @@
+import numpy as np
+from Kriging_ import predictor
+from gfunctions import *
+import chaospy as cp
+from scipy.stats import norm
+from Grassmann_ import *
+
+
+'''
+Dpl0 =  The MD displacement field- - Darius
+u0, s0, v0 = svd(Dpl0, 0)
+
+'''
+
+dim = 2
+N = 21
+
+X1 = cp.Uniform(lo=-5, up=10)
+X2 = cp.Uniform(lo=0, up=15)
+
+X = np.zeros([N, dim])
+X[:, 0] = X1.sample(N, rule="L")
+X[:, 1] = X2.sample(N, rule="L")
+
+
+Y = branin_hoo(X, 0).ravel()
+''''
+Y = STZ_Darius(X, 0, u0).ravel()
+
+'''
+
+gp = predictor(X, Y)
+
+N_test = 200
+X_test = np.zeros([N_test, dim])
+X_test[:, 0] = X1.sample(N_test)
+X_test[:, 1] = X2.sample(N_test)
+
+y_hat, s2 = gp.predict(X_test, return_std=True)
+fmin = min(y_hat)
+
+
+EI= np.zeros(X_test.shape[0])
+for i in range(N_test):
+   EI[i] = (fmin-y_hat[i])*norm.cdf((fmin-y_hat[i])/np.sqrt(s2[i]), loc=0.0, scale=1.0) + np.sqrt(s2[i])*norm.pdf((fmin-y_hat[i])/np.sqrt(s2[i]), loc=0.0, scale=1.0)
+
+
+EIsort = np.sort(EI)
+J = np.argmax(EI)
+
+
+x0 = np.sort(X_test[:, 0])
+index0 = np.argsort(x0)
+x1 = np.sort(X_test[:, 1])
+index1 = np.argsort(x1)
+
+'''
+plt.figure()
+plt.plot(x0, EI[index0], 'k', linewidth=2)
+
+plt.figure()
+plt.plot(x1, EI[index1], 'k', linewidth=2)
+plt.show()
+
+'''
+Iter = 0
+while Iter < 30:
+    Iter = Iter +1
+
+    Y_add = branin_hoo(X_test[J, :], 1).ravel()
+    Y = np.concatenate((Y, Y_add), axis = 0)
+    X = np.concatenate((X, X_test[J, :].reshape(1, dim)))
+    gp = predictor(X, Y)
+
+    N_test = 400
+    X_test = np.zeros([N_test, dim])
+    X_test[:, 0] = X1.sample(N_test, rule="L")
+    X_test[:, 1] = X2.sample(N_test, rule="L")
+
+    y_hat, s2 = gp.predict(X_test, return_std=True)
+    fmin = min(y_hat)
+
+
+    EI= np.zeros(X_test.shape[0])
+    for i in range(N_test):
+        EI[i] = (fmin-y_hat[i])*norm.cdf((fmin-y_hat[i])/np.sqrt(s2[i]), loc=0.0, scale=1.0) + np.sqrt(s2[i])*norm.pdf((fmin-y_hat[i])/np.sqrt(s2[i]), loc=0.0, scale=1.0)
+
+
+    EIsort = np.sort(EI)
+    J = np.argmax(EI)
+
+    print(X_test[J, :])
+
+np.savetxt('{0}.txt'.format('samples'), X)
+np.savetxt('{0}.txt'.format('minimum'), X_test[J, :])
+np.savetxt('{0}.txt'.format('X_test'), X_test)
+np.savetxt('{0}.txt'.format('Y_test'), y_hat)

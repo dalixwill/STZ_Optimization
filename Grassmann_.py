@@ -1,9 +1,5 @@
 import numpy as np
 import scipy
-import itertools
-from scipy.interpolate import NearestNDInterpolator
-from scipy.interpolate import interp1d
-
 
 def svd(matrix, value):
     ui, si, vi = np.linalg.svd(matrix, full_matrices=True)

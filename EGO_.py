@@ -106,6 +106,7 @@ while Iter < 100:    # Generate 100 samples
     print(X_test[J, :])
 
 
-np.savetxt('{0}.txt'.format('samples'), X)
-np.savetxt('{0}.txt'.format('X_test'), X_test)
-np.savetxt('{0}.txt'.format('Y_test'), y_hat)
+np.savetxt('{0}.txt'.format('beta_U0_modeleval'), X)
+np.savetxt('{0}.txt'.format('beta_U0_Krigeval'), X_test)
+np.savetxt('{0}.txt'.format('Gr_dist_Krigeval'), y_hat)
+np.savetxt('{0}.txt'.format('Gr_distance_modeleval'), Y)

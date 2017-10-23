@@ -1,4 +1,9 @@
 import numpy as np
+import os
+from Grassmann_ import *
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import colormaps as cmaps
 
 
 def f(x):
@@ -33,14 +38,57 @@ def branin_hoo(x, arg):
     return y
 
 
-'''
-def STZ_Darius(x, D0):
-    rank0 = (u0.shape[1])
-    D : Displacement filed from Darius code
-    u, s, v = svd(D, 0)
-    rank = (u.shape[1])
-    distance = gr_dist(u, u0, rank, rank0, 'Grassmann')
-    
+def STZ_Darius(x, D0, arg):
+    rank0 = (D0.shape[1])
+    if arg == 0:
+        distance = np.zeros(x.shape[0])
+        for i in range(x.shape[0]):
+            script = '/Users/dariusalix-williams/Documents/Continuum_Comparison/esim/coord_transforms/eran/simple_shear/shear_energy qs tem.0 energy {:7.4f} {:7.4f}'.format(x[i,0],x[i,1])
+            os.system(script)
+            myArray = np.fromfile('/Users/dariusalix-williams/Documents/Continuum_Comparison/esim/coord_transforms/eran/simple_shear/sct_q.out/tem.24', dtype=np.float32)
+            Array = myArray.reshape(36, 71)
+            D = Array[1:, 1:]
+            print()
+            '''
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            pos = ax.imshow(D, cmap=cmaps.parula, interpolation='bicubic', \
+                        origin='lower', )
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
+            fig.colorbar
+
+            print()
+            '''
+            u, s, v = svd(D, 0)
+            rank = (u.shape[1])
+            distance[i] = gr_dist(u, D0, rank, rank0, 'Grassmann')
+            print()
+    else:
+        script = '/Users/dariusalix-williams/Documents/Continuum_Comparison/esim/coord_transforms/eran/simple_shear/shear_energy qs tem.0 energy {:7.4f} {:7.4f}'.format(
+            x[0], x[1])
+        os.system(script)
+        myArray = np.fromfile(
+            '/Users/dariusalix-williams/Documents/Continuum_Comparison/esim/coord_transforms/eran/simple_shear/sct_q.out/tem.24',
+            dtype=np.float32)
+        Array = myArray.reshape(36, 71)
+        D = Array[1:, 1:]
+
+        '''
+        print()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        pos = ax.imshow(D, cmap=cmaps.parula, interpolation='bicubic', \
+                        origin='lower', )
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        fig.colorbar
+
+        print()
+        '''
+
+        u, s, v = svd(D, 0)
+        rank = (u.shape[1])
+        distance = gr_dist(u, D0, rank, rank0, 'Grassmann')
+
     return distance
-    
-'''
